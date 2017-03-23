@@ -4,6 +4,8 @@ import core.protocol.RpcRequest;
 import core.protocol.RpcResponse;
 import core.protocol.Service;
 import core.rpcClient.DefaultRpcClientHandler;
+import core.serialization.RpcDecoder;
+import core.serialization.RpcEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,6 +14,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,12 +24,12 @@ import java.util.Map;
  * Created by xinszhou on 23/03/2017.
  */
 public class DefaultRpcServer implements RpcServer {
+    Logger log = LoggerFactory.getLogger(getClass());
 
     Map<String, Object> handlerMap = new HashMap<>();
 
     @Override
     public void addService() {
-
     }
 
     public void startServer() {
@@ -54,11 +58,13 @@ public class DefaultRpcServer implements RpcServer {
             ChannelFuture future = bootstrap.bind(host, port).sync();
             System.out.println("Rpc server started on port " + port);
             future.channel().closeFuture().sync();
-        } finally {
+        } catch (Exception e) {
+            log.error("failed to establish server", e);
+        }
+        finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
-
     }
 
     @Override
